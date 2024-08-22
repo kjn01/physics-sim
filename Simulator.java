@@ -13,9 +13,10 @@ public class Simulator extends JFrame {
         frame.setSize((int)screenSize.getWidth(), (int)screenSize.getHeight());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.add(new Particles(200));
+        frame.add(new Particles(500));
 
         frame.setVisible(true);
+
     }
     
 }

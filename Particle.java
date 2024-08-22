@@ -7,12 +7,14 @@ public class Particle {
     private double radius;
 
     public Particle() {
+
         this.position = new Vector2D();
         this.velocity = new Vector2D();
         this.acceleration = new Vector2D();
 
         this.mass = 1.0;
         this.radius = 1.0;
+
     }
 
     public Particle(double mass, double radius) {
@@ -54,25 +56,40 @@ public class Particle {
 
     public Vector2D[] checkParticleCollision(Particle p2) {
 
+
         // Difference vector
         Vector2D distance_vector = p2.position.subtract(this.position);
+        if (distance_vector.equals(new Vector2D(0, 0))) {
+            distance_vector = new Vector2D(0, 0.1);
+        }
 
         double distance = distance_vector.magnitude();
 
         // Normalized
         distance_vector = distance_vector.divide(distance_vector.magnitude());
 
-        if (distance < this.radius + p2.radius) {
+        double min_distance = this.radius;
+
+        if (distance < min_distance) {
+
+            double overlap = min_distance - distance;
+            this.position = this.position.subtract(distance_vector.multiply(overlap / 2));
+            p2.position = p2.position.add(distance_vector.multiply(overlap / 2));
+
+            distance_vector = p2.position.subtract(this.position);
+            // Normalized
+            distance_vector = distance_vector.divide(distance_vector.magnitude());
 
             double v_p1_parallel = this.velocity.dot(distance_vector);
             double v_p2_parallel = p2.velocity.dot(distance_vector);
 
             double v_p1_parallel_post = (v_p1_parallel * (this.mass - p2.mass) + 2 * p2.mass * v_p2_parallel) / (this.mass + p2.mass);
             double v_p2_parallel_post = (v_p2_parallel * (p2.mass - this.mass) + 2 * this.mass * v_p1_parallel) / (this.mass + p2.mass);
-
+            
             this.velocity = this.velocity.add(distance_vector.multiply(v_p1_parallel_post - v_p1_parallel));
             p2.velocity = p2.velocity.add(distance_vector.multiply(v_p2_parallel_post - v_p2_parallel));
-            return new Vector2D[]{this.velocity, p2.velocity};
+
+            return new Vector2D[]{this.velocity, p2.velocity, this.position, p2.position};
         }
         return null;
     }
@@ -90,17 +107,17 @@ public class Particle {
             this.velocity = this.velocity.multiply(0.5);
         }
         if (Math.abs(-this.position.getY() + this.radius) < 0) {
-            this.position.setY(0);
+            this.position.setY(this.radius);
             this.velocity.setY(-this.velocity.getY());
             this.velocity = this.velocity.multiply(0.5);
         }
         if (Math.abs(this.position.getX() + this.radius) > dimensions[0]) {
-            this.position.setX(dimensions[0] + this.radius);
+            this.position.setX(dimensions[0] - this.radius);
             this.velocity.setX(-this.velocity.getX());
             this.velocity = this.velocity.multiply(0.5);
         }
-        if (Math.abs(this.position.getX() + this.radius) < 0) {
-            this.position.setX(0);
+        if (Math.abs(this.position.getX() - this.radius) < 100) {
+            this.position.setX(100 + this.radius);
             this.velocity.setX(-this.velocity.getX());
             this.velocity = this.velocity.multiply(0.5);
         }

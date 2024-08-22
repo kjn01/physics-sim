@@ -56,5 +56,12 @@ public class Vector2D {
     public String toString() {
         return "<" + this.x + ", " + this.y + ">";
     }
+
+    public boolean equals(Object o) {
+
+        Vector2D other = (Vector2D) o;
+
+        return this.x == other.x && this.y == other.y;
+    } 
     
 }

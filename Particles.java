@@ -31,7 +31,7 @@ public class Particles extends JPanel {
             particles[i].applyAcceleration(Constants.gravity);
             particles[i].setMass(1);
             particles[i].setRadius(10);
-            particles[i].setPosition(new Vector2D((int)(Math.random() * screenSize.getWidth()), particles[i].getPosition().getY()));
+            particles[i].setPosition(new Vector2D((int)(Math.random() * (screenSize.getWidth()) - 200) + 100, particles[i].getPosition().getY() - 10));
         }
 
         Timer timer = new Timer(10, new ActionListener() {
@@ -55,8 +55,11 @@ public class Particles extends JPanel {
 
         setBackground(Color.BLACK);
 
+
         Graphics2D g2D = (Graphics2D) g;
         g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2D.fillRect(110, 0, (int)screenSize.getWidth() - 210, (int)screenSize.getHeight() - 100);
 
         int i = 0;
 
@@ -71,6 +74,8 @@ public class Particles extends JPanel {
                     if (collision != null) {
                         p.setVelocity(collision[0]);
                         p2.setVelocity(collision[1]);
+                        p.setPosition(collision[2]);
+                        p2.setPosition(collision[3]);
                     }
                 }
             }

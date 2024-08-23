@@ -82,7 +82,7 @@ public class Particle {
 
             double v_p1_parallel = this.velocity.dot(distance_vector);
             double v_p2_parallel = p2.velocity.dot(distance_vector);
-
+                                   //    THIS BELOW IS PROBLEM
             double v_p1_parallel_post = (overlap / min_distance) * (v_p1_parallel * (this.mass - p2.mass) + 2 * p2.mass * v_p2_parallel) / (this.mass + p2.mass);
             double v_p2_parallel_post = (overlap / min_distance) * (v_p2_parallel * (p2.mass - this.mass) + 2 * this.mass * v_p1_parallel) / (this.mass + p2.mass);
             

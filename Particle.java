@@ -73,6 +73,7 @@ public class Particle {
         if (distance < min_distance) {
 
             double overlap = min_distance - distance;
+
             this.position = this.position.subtract(distance_vector.multiply(overlap / 2));
             p2.position = p2.position.add(distance_vector.multiply(overlap / 2));
 
@@ -82,12 +83,22 @@ public class Particle {
 
             double v_p1_parallel = this.velocity.dot(distance_vector);
             double v_p2_parallel = p2.velocity.dot(distance_vector);
-                                   //    THIS BELOW IS PROBLEM
-            double v_p1_parallel_post = (overlap / min_distance) * (v_p1_parallel * (this.mass - p2.mass) + 2 * p2.mass * v_p2_parallel) / (this.mass + p2.mass);
-            double v_p2_parallel_post = (overlap / min_distance) * (v_p2_parallel * (p2.mass - this.mass) + 2 * this.mass * v_p1_parallel) / (this.mass + p2.mass);
+
+            double v_p1_parallel_post = (v_p1_parallel * (this.mass - p2.mass) + 2 * p2.mass * v_p2_parallel) / (this.mass + p2.mass);
+            double v_p2_parallel_post = (v_p2_parallel * (p2.mass - this.mass) + 2 * this.mass * v_p1_parallel) / (this.mass + p2.mass);
             
-            this.velocity = this.velocity.add(distance_vector.multiply(v_p1_parallel_post - v_p1_parallel));
-            p2.velocity = p2.velocity.add(distance_vector.multiply(v_p2_parallel_post - v_p2_parallel));
+            if (p2.getVelocity().magnitude() < 40) {
+
+                double p1_damping_factor = Math.min(1, this.velocity.magnitude() / 100);
+                double p2_damping_factor = Math.min(1, p2.velocity.magnitude() / 100);
+
+                this.velocity = this.velocity.add(distance_vector.multiply(v_p1_parallel_post - v_p1_parallel)).multiply(p1_damping_factor);
+                p2.velocity = p2.velocity.add(distance_vector.multiply(v_p2_parallel_post - v_p2_parallel)).multiply(p2_damping_factor);
+            }
+            else {
+                this.velocity = this.velocity.add(distance_vector.multiply(v_p1_parallel_post - v_p1_parallel));
+                p2.velocity = p2.velocity.add(distance_vector.multiply(v_p2_parallel_post - v_p2_parallel));
+            }
 
             return new Vector2D[]{this.velocity, p2.velocity, this.position, p2.position};
         }
@@ -95,31 +106,28 @@ public class Particle {
     }
 
     public void checkBoundsCollision(double[] dimensions) {
-        // Vector2D difference_bottom_right = this.position.subtract(new Vector2D(dimensions[0], dimensions[1]));
-        // Vector2D difference_top_left = this.position.subtract(new Vector2D(0, 0));
-        // double distance = Math.min(difference_bottom_right.magnitude(), difference_bottom_right.magnitude());
         
-        // System.out.println(Math.abs(-this.position.getY() - dimensions[1]));
+        double damping_factor = Math.min(1, this.velocity.magnitude() / (Constants.gravity.magnitude()));
 
         if (Math.abs(-this.position.getY() + this.radius) > dimensions[1]) {
             this.position.setY(-dimensions[1] + this.radius);
             this.velocity.setY(-this.velocity.getY());
-            this.velocity = this.velocity.multiply(0.5);
+            this.velocity = this.velocity.multiply(damping_factor);
         }
         if (Math.abs(-this.position.getY() + this.radius) < 0) {
             this.position.setY(this.radius);
             this.velocity.setY(-this.velocity.getY());
-            this.velocity = this.velocity.multiply(0.5);
+            this.velocity = this.velocity.multiply(damping_factor);
         }
         if (Math.abs(this.position.getX() + this.radius) > dimensions[0]) {
             this.position.setX(dimensions[0] - this.radius);
             this.velocity.setX(-this.velocity.getX());
-            this.velocity = this.velocity.multiply(0.5);
+            this.velocity = this.velocity.multiply(damping_factor);
         }
         if (Math.abs(this.position.getX() - this.radius) < 100) {
             this.position.setX(100 + this.radius);
             this.velocity.setX(-this.velocity.getX());
-            this.velocity = this.velocity.multiply(0.5);
+            this.velocity = this.velocity.multiply(damping_factor);
         }
     }
 
